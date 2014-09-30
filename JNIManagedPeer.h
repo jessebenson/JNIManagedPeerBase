@@ -53,12 +53,20 @@ namespace JNI {
 	struct JClass : public JObject
 	{
 		explicit JClass(const char* className);
-		JClass(const JClass& clazz);
-		JClass(JClass&& clazz);
-		~JClass();
+		JClass(const JClass& clazz) : JObject(clazz) { }
+		JClass(JClass&& clazz) : JObject(clazz) { }
 
-		JClass& operator=(const JClass& clazz);
-		JClass& operator=(JClass&& clazz);
+		JClass& operator=(const JClass& clazz)
+		{
+			JObject::operator=(clazz);
+			return *this;
+		}
+
+		JClass& operator=(JClass&& clazz)
+		{
+			JObject::operator=(clazz);
+			return *this;
+		}
 
 		operator jclass() const { return (jclass) Object(); }
 	};
