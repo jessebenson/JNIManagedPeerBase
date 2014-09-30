@@ -118,22 +118,18 @@ namespace JNI {
 	{
 	}
 
-
-	JNIManagedPeer::JNIManagedPeer()
-		: m_Object(nullptr)
+	JClass::~JClass()
 	{
 	}
+
 
 	JNIManagedPeer::JNIManagedPeer(jobject object)
 		: m_Object(object)
 	{
-		Env().NewGlobalRef(object);
 	}
 
 	JNIManagedPeer::~JNIManagedPeer()
 	{
-		if (m_Object != nullptr)
-			Env().DeleteGlobalRef(m_Object);
 	}
 
 	JNIEnv& JNIManagedPeer::Env()
