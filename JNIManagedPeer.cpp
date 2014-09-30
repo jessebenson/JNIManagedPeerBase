@@ -47,6 +47,78 @@ namespace JNI {
 	}
 
 
+	JObject::JObject(jobject object, bool releaseLocalRef)
+	{
+		JNIEnv* env = GetEnvironment();
+		AttachObject(env, object);
+		if (releaseLocalRef)
+		{
+			env->DeleteLocalRef(object);
+		}
+	}
+
+	JObject::JObject(const JObject& object)
+	{
+		AttachObject(GetEnvironment(), object.m_Object);
+	}
+	
+	JObject::JObject(JObject&& object)
+		: m_Object(object.m_Object)
+	{
+		object.m_Object = nullptr;
+	}
+
+	JObject::~JObject()
+	{
+		ReleaseObject(GetEnvironment());
+	}
+
+	JObject& JObject::operator=(const JObject& object)
+	{
+		if (this != &object)
+		{
+			JNIEnv* env = GetEnvironment();
+			ReleaseObject(env);
+			AttachObject(env, object.m_Object);
+		}
+		return *this;
+	}
+
+	JObject& JObject::operator=(JObject&& object)
+	{
+		if (this != &object)
+		{
+			ReleaseObject(GetEnvironment());
+			m_Object = object.m_Object;
+			object.m_Object = nullptr;
+		}
+		return *this;
+	}
+
+	void JObject::AttachObject(JNIEnv* env, jobject object)
+	{
+		if (object != nullptr)
+		{
+			m_Object = env->NewGlobalRef(object);	
+		}
+	}
+	
+	void JObject::ReleaseObject(JNIEnv* env)
+	{
+		if (m_Object != nullptr)
+		{
+			env->DeleteGlobalRef(m_Object);
+			m_Object = nullptr;
+		}
+	}
+
+
+	JClass::JClass(const char* className)
+		: JObject(GetEnvironment()->FindClass(className), /*deleteLocalRef:*/ true)
+	{
+	}
+
+
 	JNIManagedPeer::JNIManagedPeer()
 		: m_Object(nullptr)
 	{
@@ -67,20 +139,6 @@ namespace JNI {
 	JNIEnv& JNIManagedPeer::Env()
 	{
 		return *GetEnvironment();
-	}
-
-
-	JClass::JClass(const char* className)
-	{
-		JNIEnv* env = GetEnvironment();
-		jclass clazz = env->FindClass(className);
-		m_Class = env->NewGlobalRef(jclazz);
-		env->DeleteLocalRef(clazz);		
-	}
-
-	JClass::~JClass()
-	{
-		GetEnvironment()->DeleteGlobalRef(m_Class);
 	}
 
 } // namespace JNI
