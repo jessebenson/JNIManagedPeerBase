@@ -55,6 +55,7 @@ namespace JNI {
 		explicit JClass(const char* className);
 		JClass(const JClass& clazz) : JObject(clazz) { }
 		JClass(JClass&& clazz) : JObject(clazz) { }
+		~JClass();
 
 		JClass& operator=(const JClass& clazz)
 		{
@@ -78,12 +79,7 @@ namespace JNI {
 	public:
 		// Constructor with a Java object to be able to invoke instance methods.
 		explicit ManagedPeer(jobject object);
-		ManagedPeer(const ManagedPeer& peer);
-		ManagedPeer(ManagedPeer&& peer);
 		~ManagedPeer();
-
-		ManagedPeer& operator=(const ManagedPeer& peer);
-		ManagedPeer& operator=(ManagedPeer&& peer);
 
 		jobject Object() const { return m_Object; }
 
@@ -91,10 +87,7 @@ namespace JNI {
 		static JNIEnv& Env();
 
 	private:
-		void AttachObject(jobject object);
-		void ReleaseObject();
-
-		jobject m_Object;
+		JObject m_Object;
 	};
 
 
